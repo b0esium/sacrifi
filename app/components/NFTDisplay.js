@@ -12,20 +12,23 @@ export default function NFTDisplay() {
     const alchemy = new Alchemy(settings)
 
     const [nfts, setNfts] = useState([])
-    const [titles, setTitles] = useState([])
 
     async function getNfts() {
-        const nftsForOwner = await alchemy.nft.getNftsForOwner(address)
+        const excludeFilters = "SPAM"
+        const nftsForOwner = await alchemy.nft.getNftsForOwner(address, excludeFilters)
+
         console.log("number of NFTs found:", nftsForOwner.totalCount)
-        setNfts([...nftsForOwner.ownedNfts])
-        const titles = nfts.map((nft) => nft.title)
-        setTitles([...titles])
-        // for (const nft of nftsForOwner.ownedNfts) {
-        //     console.log(nft.title)
-        //     // if (nft.media[0].gateway) {
-        //     //     console.log(nft.media[0].gateway)
-        //     // }
-        // }
+
+        let filteredNfts = nftsForOwner.ownedNfts.filter((nft) => {
+            return nft.title !== ""
+        })
+        filteredNfts = filteredNfts.filter((nft) => {
+            return nft.media[0].gateway.includes("nft-cdn.alchemy.com")
+        })
+
+        console.log("number of NFTs found after filtering:", filteredNfts.length)
+
+        setNfts([...filteredNfts])
     }
 
     return (
@@ -35,8 +38,16 @@ export default function NFTDisplay() {
             </button>
 
             <ul>
-                {titles.map((title, index) => (
-                    <li key={index}>{title}</li>
+                {nfts.map((nft, index) => (
+                    <div key={index} className="group">
+                        <li>{nft.title}</li>
+                        <Image
+                            src={nft.media[0].gateway}
+                            width={100}
+                            height={100}
+                            alt={nft.title}
+                        />
+                    </div>
                 ))}
             </ul>
 
