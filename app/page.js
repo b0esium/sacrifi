@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
 import Altar from "./components/Altar"
@@ -7,6 +8,13 @@ import NFTDisplay from "./components/NFTDisplay"
 
 export default function Home() {
     const { isConnected } = useAccount()
+
+    const [nftToSacrify, setNftToSacrify] = React.useState(null)
+    console.log("state: " + nftToSacrify)
+
+    function handleSelect(nft) {
+        setNftToSacrify(nft)
+    }
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -18,8 +26,12 @@ export default function Home() {
                     <ConnectButton />
                 </div>
             </div>
-            {isConnected ? <Altar /> : <h1 className="text-6xl font-bold">Sacri.fi</h1>}
-            {isConnected && <NFTDisplay />}
+            {isConnected ? (
+                <Altar nftToSacrify={nftToSacrify} />
+            ) : (
+                <h1 className="text-6xl font-bold">Sacri.fi</h1>
+            )}
+            {isConnected && <NFTDisplay handleSelect={handleSelect} />}
         </main>
     )
 }

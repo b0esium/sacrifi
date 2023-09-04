@@ -3,7 +3,7 @@ import { useAccount } from "wagmi"
 import { Network, Alchemy } from "alchemy-sdk"
 import { useState, useEffect } from "react"
 
-export default function NFTDisplay() {
+export default function NFTDisplay({ handleSelect }) {
     const { address } = useAccount()
     const settings = {
         apiKey: process.env.ALCHEMY_API_KEY,
@@ -43,7 +43,10 @@ export default function NFTDisplay() {
             {nfts.map((nft, index) => (
                 <div
                     key={index}
-                    className="group justify-self-start rounded-lg border px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+                    onClick={() => {
+                        handleSelect(nft.title)
+                    }}
+                    className="group justify-self-start rounded-lg border px-5 py-4 transition-colors hover:border-red-500 hover:bg-red-300 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
                 >
                     <h4 className={`mb-3 text-l font-semibold`}>{nft.title}</h4>
                     <Image src={nft.media[0].gateway} width={200} height={200} alt={nft.title} />
