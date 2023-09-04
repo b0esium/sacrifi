@@ -44,7 +44,7 @@ export default function NFTDisplay({ handleSelect }) {
                 <div
                     key={index}
                     onClick={() => {
-                        handleSelect(nft.title)
+                        handleSelect(nft)
                     }}
                     className="group justify-self-start rounded-lg border px-5 py-4 transition-colors hover:border-red-500 hover:bg-red-300 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
                 >

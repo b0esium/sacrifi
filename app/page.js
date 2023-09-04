@@ -10,10 +10,18 @@ export default function Home() {
     const { isConnected } = useAccount()
 
     const [nftToSacrify, setNftToSacrify] = React.useState(null)
-    console.log("state: " + nftToSacrify)
+    const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
 
     function handleSelect(nft) {
-        setNftToSacrify(nft)
+        if (!sacrificeAsked) {
+            setNftToSacrify(nft)
+        }
+        const nftString = JSON.stringify(nft)
+        console.log("tokenId: " + nftString)
+    }
+
+    function toggleSacrify() {
+        setSacrificeAsked(!sacrificeAsked)
     }
 
     return (
@@ -27,7 +35,11 @@ export default function Home() {
                 </div>
             </div>
             {isConnected ? (
-                <Altar nftToSacrify={nftToSacrify} />
+                <Altar
+                    nftToSacrify={nftToSacrify}
+                    sacrificeAsked={sacrificeAsked}
+                    toggleSacrify={toggleSacrify}
+                />
             ) : (
                 <h1 className="text-6xl font-bold">Sacri.fi</h1>
             )}
