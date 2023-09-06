@@ -2,22 +2,31 @@
 
 import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useAccount } from "wagmi"
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi"
+import abi from "./abi.json"
 import Altar from "./components/Altar"
 import NFTDisplay from "./components/NFTDisplay"
 
 export default function Home() {
     const { isConnected } = useAccount()
 
+    // load smart contract
+    const { config } = usePrepareContractWrite({
+        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        abi: abi,
+        functionName: "safeMint",
+        chainId: 1337,
+    })
+    const { data, isLoading, isSuccess, write } = useContractWrite(config)
+
     const [nftToSacrify, setNftToSacrify] = React.useState(null)
     const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
 
+    // only send NFT if altar is empty
     function handleSelect(nft) {
         if (!sacrificeAsked) {
             setNftToSacrify(nft)
         }
-        const nftString = JSON.stringify(nft)
-        console.log("tokenId: " + nftString)
     }
 
     function toggleSacrify() {
@@ -33,6 +42,18 @@ export default function Home() {
                 <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
                     <ConnectButton />
                 </div>
+            </div>
+            <div>
+                <button
+                    className="p-4 rounded bg-violet-600"
+                    disabled={!write}
+                    //@ TODO: disable while confirming in MM
+                    onClick={() => write?.()}
+                >
+                    Mint
+                </button>
+                {isLoading && <div>Confirming...</div>}
+                {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
             </div>
             {isConnected ? (
                 <Altar

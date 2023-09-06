@@ -8,17 +8,15 @@ import {
 } from "@rainbow-me/rainbowkit"
 import { argentWallet, trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/wallets"
 import { configureChains, createConfig, WagmiConfig } from "wagmi"
-import { mainnet, polygon, optimism, arbitrum, zora, goerli } from "wagmi/chains"
+import { mainnet, sepolia, localhost } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
     [
         mainnet,
-        polygon,
-        optimism,
-        arbitrum,
-        zora,
-        ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [goerli] : []),
+        sepolia,
+        localhost,
+        ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [sepolia] : []),
     ],
     [publicProvider()]
 )
@@ -26,13 +24,13 @@ const { chains, publicClient, webSocketPublicClient } = configureChains(
 const projectId = process.env.NEXT_PUBLIC_W3C_PID
 
 const { wallets } = getDefaultWallets({
-    appName: "RainbowKit demo",
+    appName: "Sacrifi",
     projectId,
     chains,
 })
 
 const demoAppInfo = {
-    appName: "Rainbowkit Demo",
+    appName: "Sacrifi",
 }
 
 const connectors = connectorsForWallets([
