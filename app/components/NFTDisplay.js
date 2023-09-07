@@ -6,9 +6,8 @@ import { useState, useEffect } from "react"
 export default function NFTDisplay({ handleSelect }) {
     const { address } = useAccount()
     const settings = {
-        apiKey: process.env.ALCHEMY_API_KEY,
-        //@ TODO: switch to actual network, to test on localhost
-        network: Network.ETH_MAINNET,
+        apiKey: process.env.ALCHEMY_API_KEY_SEPOLIA,
+        network: Network.ETH_SEPOLIA,
     }
     const alchemy = new Alchemy(settings)
 

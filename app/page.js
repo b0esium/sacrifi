@@ -12,10 +12,11 @@ export default function Home() {
 
     // load smart contract
     const { config } = usePrepareContractWrite({
-        address: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        address: "0x5e9d0B25d46C62eC1d1Ea8c1d6b6BC0CD52375e9",
         abi: abi,
         functionName: "safeMint",
-        chainId: 1337,
+        // sepolia
+        chainId: 11155111,
     })
     const { data, isLoading, isSuccess, write } = useContractWrite(config)
 
@@ -45,10 +46,12 @@ export default function Home() {
             </div>
             <div>
                 <button
+                    id="mintBtn"
                     className="p-4 rounded bg-violet-600"
-                    disabled={!write}
-                    //@ TODO: disable while confirming in MM
-                    onClick={() => write?.()}
+                    disabled={!write || isLoading}
+                    onClick={() => {
+                        write?.()
+                    }}
                 >
                     Mint
                 </button>

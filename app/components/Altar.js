@@ -27,7 +27,7 @@ export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify }) {
                     </button>
                 </div>
             )}
-            {!sacrificeAsked && (
+            {nftToSacrify && !sacrificeAsked && (
                 <button onClick={() => toggleSacrify()} className="p-4 bg-red-500 rounded">
                     Sacrify
                 </button>
