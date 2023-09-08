@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+require("dotenv").config()
 import {
     RainbowKitProvider,
     getDefaultWallets,
@@ -10,15 +11,13 @@ import { argentWallet, trustWallet, ledgerWallet } from "@rainbow-me/rainbowkit/
 import { configureChains, createConfig, WagmiConfig } from "wagmi"
 import { mainnet, sepolia, localhost } from "wagmi/chains"
 import { publicProvider } from "wagmi/providers/public"
+import { alchemyProvider } from "wagmi/providers/alchemy"
+
+const alchemyApiKey = process.env.NEXT_PUBLIC_ALCHEMY_API_KEY_SEPOLIA
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-    [
-        mainnet,
-        sepolia,
-        localhost,
-        ...(process.env.NEXT_PUBLIC_ENABLE_TESTNETS === "true" ? [sepolia] : []),
-    ],
-    [publicProvider()]
+    [mainnet, sepolia, localhost],
+    [alchemyProvider({ apiKey: alchemyApiKey }), publicProvider()]
 )
 
 const projectId = process.env.NEXT_PUBLIC_W3C_PID
@@ -28,10 +27,6 @@ const { wallets } = getDefaultWallets({
     projectId,
     chains,
 })
-
-const demoAppInfo = {
-    appName: "Sacrifi",
-}
 
 const connectors = connectorsForWallets([
     ...wallets,
@@ -52,12 +47,16 @@ const wagmiConfig = createConfig({
     webSocketPublicClient,
 })
 
+const appInfo = {
+    appName: "Sacrifi",
+}
+
 export function Providers({ children }) {
     const [mounted, setMounted] = React.useState(false)
     React.useEffect(() => setMounted(true), [])
     return (
         <WagmiConfig config={wagmiConfig}>
-            <RainbowKitProvider chains={chains} appInfo={demoAppInfo}>
+            <RainbowKitProvider chains={chains} appInfo={appInfo}>
                 {mounted && children}
             </RainbowKitProvider>
         </WagmiConfig>
