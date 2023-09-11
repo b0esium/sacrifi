@@ -2,7 +2,12 @@
 
 import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi"
+import {
+    useAccount,
+    useContractWrite,
+    usePrepareContractWrite,
+    useWaitForTransaction,
+} from "wagmi"
 import abi from "./abi.json"
 import Altar from "./components/Altar"
 import NFTDisplay from "./components/NFTDisplay"
@@ -10,18 +15,23 @@ import NFTDisplay from "./components/NFTDisplay"
 export default function Home() {
     const { isConnected } = useAccount()
 
-    // load smart contract
-    const { config } = usePrepareContractWrite({
+    // load smart contract functions
+    const { config: configMint } = usePrepareContractWrite({
         address: "0x5e9d0B25d46C62eC1d1Ea8c1d6b6BC0CD52375e9",
         abi: abi,
         functionName: "safeMint",
         // sepolia
         chainId: 11155111,
     })
-    const { data, isLoading, isSuccess, write } = useContractWrite(config)
+    const { data: dataMint, isLoading, write: writeMint } = useContractWrite(configMint)
+
+    const { isLoading: isLoadingMint, isSuccess: isSuccessMint } = useWaitForTransaction({
+        hash: dataMint?.hash,
+    })
 
     const [nftToSacrify, setNftToSacrify] = React.useState(null)
     const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
+    const [nftMinted, setNftMinted] = React.useState(false)
 
     // only send NFT if altar is empty
     function handleSelect(nft) {
@@ -32,6 +42,16 @@ export default function Home() {
 
     function toggleSacrify() {
         setSacrificeAsked(!sacrificeAsked)
+    }
+
+    function mintNft() {
+        writeMint?.()
+    }
+
+    function burnNft(nft) {
+        alert("NFT burned!")
+        toggleSacrify()
+        setNftToSacrify(null)
     }
 
     return (
@@ -48,26 +68,38 @@ export default function Home() {
                 <button
                     id="mintBtn"
                     className="p-4 rounded bg-violet-600"
-                    disabled={!write || isLoading}
-                    onClick={() => {
-                        write?.()
-                    }}
+                    disabled={!writeMint || isLoading || isLoadingMint}
+                    onClick={() => mintNft()}
                 >
-                    Mint
+                    {isLoadingMint ? "Minting..." : "Mint"}
                 </button>
-                {isLoading && <div>Confirming...</div>}
-                {isSuccess && <div>Transaction: {JSON.stringify(data)}</div>}
+                {isSuccessMint && (
+                    <div>
+                        Successfully minted your NFT!
+                        <div>
+                            <a
+                                className="underline"
+                                href={`https://etherscan.io/tx/${dataMint?.hash}`}
+                            >
+                                Etherscan link
+                            </a>
+                        </div>
+                    </div>
+                )}
             </div>
             {isConnected ? (
                 <Altar
                     nftToSacrify={nftToSacrify}
                     sacrificeAsked={sacrificeAsked}
                     toggleSacrify={toggleSacrify}
+                    burnNft={burnNft}
                 />
             ) : (
                 <h1 className="text-6xl font-bold">Sacri.fi</h1>
             )}
-            {isConnected && <NFTDisplay handleSelect={handleSelect} />}
+            {isConnected && (
+                <NFTDisplay handleSelect={handleSelect} updateNeeded={isSuccessMint} />
+            )}
         </main>
     )
 }

@@ -3,7 +3,7 @@ import { useAccount } from "wagmi"
 import { Network, Alchemy } from "alchemy-sdk"
 import { useState, useEffect } from "react"
 
-export default function NFTDisplay({ handleSelect }) {
+export default function NFTDisplay({ handleSelect, updateNeeded }) {
     const { address } = useAccount()
     const settings = {
         apiKey: process.env.ALCHEMY_API_KEY_SEPOLIA,
@@ -16,7 +16,7 @@ export default function NFTDisplay({ handleSelect }) {
     //@ TODO: trigger on NFT mint event received
     useEffect(() => {
         getNfts()
-    }, [])
+    }, [updateNeeded])
 
     async function getNfts() {
         // exclude spam NFTs known by the Alchemy API
@@ -31,7 +31,10 @@ export default function NFTDisplay({ handleSelect }) {
         })
         // exclude NFTs with no images cached by Alchemy API (usually spam)
         filteredNfts = filteredNfts.filter((nft) => {
-            return nft.media[0].gateway.includes("nft-cdn.alchemy.com")
+            return (
+                nft.media[0].gateway.includes("nft-cdn.alchemy.com") ||
+                nft.media[0].gateway.includes("ipfs.io")
+            )
         })
 
         console.log("number of NFTs found after filtering:", filteredNfts.length)

@@ -14,6 +14,12 @@ const nextConfig = {
                 port: "",
                 pathname: "/eth-mainnet/**",
             },
+            {
+                protocol: "https",
+                hostname: "ipfs.io",
+                port: "",
+                pathname: "/ipfs/**",
+            },
         ],
         dangerouslyAllowSVG: true,
     },

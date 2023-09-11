@@ -1,7 +1,7 @@
 import React from "react"
 import Image from "next/image"
 
-export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify }) {
+export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify, burnNft }) {
     return (
         <div className="grid m-8">
             <div className="flex items-center justify-center p-8 aspect-square rounded-lg border-neutral-700 bg-neutral-800 bg-opacity-30">
@@ -21,7 +21,12 @@ export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify }) {
             </div>
             {sacrificeAsked && (
                 <div className="grid">
-                    <button className="p-4 bg-red-800 rounded">Confirm</button>
+                    <button
+                        className="p-4 bg-red-800 rounded"
+                        onClick={() => burnNft(nftToSacrify)}
+                    >
+                        Confirm
+                    </button>
                     <button className="p-4 bg-gray-400 rounded" onClick={() => toggleSacrify()}>
                         Cancel
                     </button>
