@@ -4,20 +4,28 @@ import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import {
     useAccount,
-    useContractWrite,
     usePrepareContractWrite,
+    useContractWrite,
     useWaitForTransaction,
 } from "wagmi"
+import { useDebounce } from "@uidotdev/usehooks"
 import abi from "./abi.json"
 import Altar from "./components/Altar"
 import NFTDisplay from "./components/NFTDisplay"
 
 export default function Home() {
+    // state management
+    const [nftToSacrify, setNftToSacrify] = React.useState(null)
+    const [tokenIdToBurn, setTokenIdToBurn] = React.useState("")
+    const debouncedTokenIdToBurn = useDebounce(tokenIdToBurn, 500)
+    const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
+
     const { isConnected } = useAccount()
 
-    // load smart contract functions
+    // load smart contract function hooks
+    // mint
     const { config: configMint } = usePrepareContractWrite({
-        address: "0x5e9d0B25d46C62eC1d1Ea8c1d6b6BC0CD52375e9",
+        address: "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
         abi: abi,
         functionName: "safeMint",
         // sepolia
@@ -29,10 +37,20 @@ export default function Home() {
         hash: dataMint?.hash,
     })
 
-    const [nftToSacrify, setNftToSacrify] = React.useState(null)
-    const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
-    const [nftMinted, setNftMinted] = React.useState(false)
+    // burn
+    const { config: configBurn } = usePrepareContractWrite({
+        address: "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
+        abi: abi,
+        functionName: "burn",
+        // sepolia
+        chainId: 11155111,
+        args: [debouncedTokenIdToBurn],
+        // don't send transaction if tokenIdToBurn is empty i.e. on page load
+        enabled: Boolean(debouncedTokenIdToBurn),
+    })
+    const { write: writeBurn } = useContractWrite(configBurn)
 
+    // functions
     // only send NFT if altar is empty
     function handleSelect(nft) {
         if (!sacrificeAsked) {
@@ -48,8 +66,13 @@ export default function Home() {
         writeMint?.()
     }
 
-    function burnNft(nft) {
-        alert("NFT burned!")
+    function burnNft(tokenId) {
+        setTokenIdToBurn(tokenId)
+        console.log("configBurn: ", configBurn)
+        console.log("writeBurn: ", writeBurn)
+        // no need to give an argument to writeBurn, it's already in the config
+        writeBurn?.()
+
         toggleSacrify()
         setNftToSacrify(null)
     }

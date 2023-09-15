@@ -23,7 +23,7 @@ export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify, bur
                 <div className="grid">
                     <button
                         className="p-4 bg-red-800 rounded"
-                        onClick={() => burnNft(nftToSacrify)}
+                        onClick={() => burnNft(parseInt(nftToSacrify.tokenId))}
                     >
                         Confirm
                     </button>

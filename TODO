@@ -1,0 +1,10 @@
+-   burn NFT from local collection
+-   mint special NFT only if already burned at least one
+-   burn NFT from any collection (with setApproval)
+-   improve UI (with Tailwind)
+-   enhance code (with AI)
+-   document (with AI)
+-   mint a generative art NFT
+-   rewrite in Typescript
+-   calculate minted NFT rarity from burned NFT price x randomness
+-   improve game theory aspect

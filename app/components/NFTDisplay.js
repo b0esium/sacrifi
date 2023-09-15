@@ -13,7 +13,6 @@ export default function NFTDisplay({ handleSelect, updateNeeded }) {
 
     const [nfts, setNfts] = useState([])
     // load NFT data when this component is mounted
-    //@ TODO: trigger on NFT mint event received
     useEffect(() => {
         getNfts()
     }, [updateNeeded])
