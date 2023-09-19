@@ -8,22 +8,18 @@ import {
     useContractWrite,
     useWaitForTransaction,
 } from "wagmi"
-import { useDebounce } from "@uidotdev/usehooks"
 import abi from "./abi.json"
 import Altar from "./components/Altar"
 import NFTDisplay from "./components/NFTDisplay"
 
 export default function Home() {
     // state management
-    const [nftToSacrify, setNftToSacrify] = React.useState(null)
-    const [tokenIdToBurn, setTokenIdToBurn] = React.useState("")
-    const debouncedTokenIdToBurn = useDebounce(tokenIdToBurn, 500)
     const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
+    const [nftToSacrify, setNftToSacrify] = React.useState(null)
 
     const { isConnected } = useAccount()
 
-    // load smart contract function hooks
-    // mint
+    // load smart contract function hook
     const { config: configMint } = usePrepareContractWrite({
         address: "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
         abi: abi,
@@ -32,23 +28,9 @@ export default function Home() {
         chainId: 11155111,
     })
     const { data: dataMint, isLoading, write: writeMint } = useContractWrite(configMint)
-
     const { isLoading: isLoadingMint, isSuccess: isSuccessMint } = useWaitForTransaction({
         hash: dataMint?.hash,
     })
-
-    // burn
-    const { config: configBurn } = usePrepareContractWrite({
-        address: "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
-        abi: abi,
-        functionName: "burn",
-        // sepolia
-        chainId: 11155111,
-        args: [debouncedTokenIdToBurn],
-        // don't send transaction if tokenIdToBurn is empty i.e. on page load
-        enabled: Boolean(debouncedTokenIdToBurn),
-    })
-    const { write: writeBurn } = useContractWrite(configBurn)
 
     // functions
     // only send NFT if altar is empty
@@ -63,18 +45,11 @@ export default function Home() {
     }
 
     function mintNft() {
-        writeMint?.()
-    }
-
-    function burnNft(tokenId) {
-        setTokenIdToBurn(tokenId)
-        console.log("configBurn: ", configBurn)
-        console.log("writeBurn: ", writeBurn)
-        // no need to give an argument to writeBurn, it's already in the config
-        writeBurn?.()
-
-        toggleSacrify()
-        setNftToSacrify(null)
+        try {
+            writeMint?.()
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
@@ -94,7 +69,7 @@ export default function Home() {
                     disabled={!writeMint || isLoading || isLoadingMint}
                     onClick={() => mintNft()}
                 >
-                    {isLoadingMint ? "Minting..." : "Mint"}
+                    {isLoading || isLoadingMint ? "Minting..." : "Mint"}
                 </button>
                 {isSuccessMint && (
                     <div>
@@ -113,9 +88,9 @@ export default function Home() {
             {isConnected ? (
                 <Altar
                     nftToSacrify={nftToSacrify}
+                    setNftToSacrify={setNftToSacrify}
                     sacrificeAsked={sacrificeAsked}
                     toggleSacrify={toggleSacrify}
-                    burnNft={burnNft}
                 />
             ) : (
                 <h1 className="text-6xl font-bold">Sacri.fi</h1>

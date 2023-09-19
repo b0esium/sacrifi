@@ -1,7 +1,11 @@
--   burn NFT from local collection
+-   refresh UI after burn
+-   pb: UI doesn't always refresh
+-   add debounce
+-   manage errors
 -   mint special NFT only if already burned at least one
 -   burn NFT from any collection (with setApproval)
 -   improve UI (with Tailwind)
+-   avoid multiple Alchemy API calls
 -   enhance code (with AI)
 -   document (with AI)
 -   mint a generative art NFT

@@ -12,7 +12,8 @@ export default function NFTDisplay({ handleSelect, updateNeeded }) {
     const alchemy = new Alchemy(settings)
 
     const [nfts, setNfts] = useState([])
-    // load NFT data when this component is mounted
+
+    // load NFT data when this component is mounted and after each mint or burn
     useEffect(() => {
         getNfts()
     }, [updateNeeded])

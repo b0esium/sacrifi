@@ -1,7 +1,44 @@
 import React from "react"
 import Image from "next/image"
+import { ethers } from "ethers"
+import abi from "../abi.json"
 
-export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify, burnNft }) {
+export default function Altar({ nftToSacrify, setNftToSacrify, sacrificeAsked, toggleSacrify }) {
+    const [isLoading, setIsLoading] = React.useState(false)
+    const [tx, setTx] = React.useState("")
+    const [showTx, setShowTx] = React.useState(false)
+
+    React.useEffect(() => {
+        setShowTx(false)
+    }, [nftToSacrify])
+
+    async function burnNft(tokenId) {
+        if (typeof window.ethereum !== undefined) {
+            const provider = new ethers.BrowserProvider(window.ethereum)
+            const signer = await provider.getSigner()
+            const contract = new ethers.Contract(
+                "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
+                abi,
+                signer
+            )
+            setIsLoading(true)
+            try {
+                const transactionResponse = await contract.burn(tokenId)
+                await transactionResponse.wait()
+                provider.once(transactionResponse.hash, () => {
+                    setTx(transactionResponse.hash.toString())
+                    setShowTx(true)
+                })
+            } catch (error) {
+                console.log(error)
+            } finally {
+                setIsLoading(false)
+                toggleSacrify()
+                setNftToSacrify(null)
+            }
+        }
+    }
+
     return (
         <div className="grid m-8">
             <div className="flex items-center justify-center p-8 aspect-square rounded-lg border-neutral-700 bg-neutral-800 bg-opacity-30">
@@ -23,11 +60,16 @@ export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify, bur
                 <div className="grid">
                     <button
                         className="p-4 bg-red-800 rounded"
+                        disabled={isLoading}
                         onClick={() => burnNft(parseInt(nftToSacrify.tokenId))}
                     >
-                        Confirm
+                        {isLoading ? "Burning..." : "Burn"}
                     </button>
-                    <button className="p-4 bg-gray-400 rounded" onClick={() => toggleSacrify()}>
+                    <button
+                        className="p-4 bg-gray-400 rounded"
+                        disabled={isLoading}
+                        onClick={() => toggleSacrify()}
+                    >
                         Cancel
                     </button>
                 </div>
@@ -36,6 +78,16 @@ export default function Altar({ nftToSacrify, sacrificeAsked, toggleSacrify, bur
                 <button onClick={() => toggleSacrify()} className="p-4 bg-red-500 rounded">
                     Sacrify
                 </button>
+            )}
+            {showTx && (
+                <div>
+                    Successfully burned your NFT!
+                    <div>
+                        <a className="underline" href={`https://etherscan.io/tx/${tx}`}>
+                            Etherscan link
+                        </a>
+                    </div>
+                </div>
             )}
         </div>
     )
