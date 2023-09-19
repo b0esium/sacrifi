@@ -3,7 +3,7 @@ import { useAccount } from "wagmi"
 import { Network, Alchemy } from "alchemy-sdk"
 import { useState, useEffect } from "react"
 
-export default function NFTDisplay({ handleSelect, updateNeeded }) {
+export default function NFTDisplay({ handleSelect, refreshAfterMint, refreshAfterBurn }) {
     const { address } = useAccount()
     const settings = {
         apiKey: process.env.ALCHEMY_API_KEY_SEPOLIA,
@@ -16,7 +16,7 @@ export default function NFTDisplay({ handleSelect, updateNeeded }) {
     // load NFT data when this component is mounted and after each mint or burn
     useEffect(() => {
         getNfts()
-    }, [updateNeeded])
+    }, [refreshAfterMint, refreshAfterBurn])
 
     async function getNfts() {
         // exclude spam NFTs known by the Alchemy API

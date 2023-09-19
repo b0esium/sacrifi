@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"
+import React, { useEffect } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import {
     useAccount,
@@ -16,6 +16,7 @@ export default function Home() {
     // state management
     const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
     const [nftToSacrify, setNftToSacrify] = React.useState(null)
+    const [refreshAfterBurn, setRefreshAfterBurn] = React.useState(false)
 
     const { isConnected } = useAccount()
 
@@ -50,6 +51,11 @@ export default function Home() {
         } catch (error) {
             console.log(error)
         }
+    }
+
+    function refreshUIAfterBurn() {
+        // trigger getNfts() in NFTDisplay
+        setRefreshAfterBurn(!refreshAfterBurn)
     }
 
     return (
@@ -91,12 +97,17 @@ export default function Home() {
                     setNftToSacrify={setNftToSacrify}
                     sacrificeAsked={sacrificeAsked}
                     toggleSacrify={toggleSacrify}
+                    refreshUIAfterBurn={refreshUIAfterBurn}
                 />
             ) : (
                 <h1 className="text-6xl font-bold">Sacri.fi</h1>
             )}
             {isConnected && (
-                <NFTDisplay handleSelect={handleSelect} updateNeeded={isSuccessMint} />
+                <NFTDisplay
+                    handleSelect={handleSelect}
+                    refreshAfterMint={isSuccessMint}
+                    refreshAfterBurn={refreshAfterBurn}
+                />
             )}
         </main>
     )

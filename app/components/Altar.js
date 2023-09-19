@@ -3,7 +3,13 @@ import Image from "next/image"
 import { ethers } from "ethers"
 import abi from "../abi.json"
 
-export default function Altar({ nftToSacrify, setNftToSacrify, sacrificeAsked, toggleSacrify }) {
+export default function Altar({
+    nftToSacrify,
+    setNftToSacrify,
+    sacrificeAsked,
+    toggleSacrify,
+    refreshUIAfterBurn,
+}) {
     const [isLoading, setIsLoading] = React.useState(false)
     const [tx, setTx] = React.useState("")
     const [showTx, setShowTx] = React.useState(false)
@@ -32,9 +38,11 @@ export default function Altar({ nftToSacrify, setNftToSacrify, sacrificeAsked, t
             } catch (error) {
                 console.log(error)
             } finally {
+                // cleanup
                 setIsLoading(false)
                 toggleSacrify()
                 setNftToSacrify(null)
+                refreshUIAfterBurn()
             }
         }
     }
