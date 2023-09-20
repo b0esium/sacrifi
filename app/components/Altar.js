@@ -8,7 +8,7 @@ export default function Altar({
     setNftToSacrify,
     sacrificeAsked,
     toggleSacrify,
-    refreshUIAfterBurn,
+    refreshListAfterBurn,
 }) {
     // initialize state
     const [isLoading, setIsLoading] = React.useState(false)
@@ -18,8 +18,12 @@ export default function Altar({
 
     // remove previous tx info or error message when selecting a new NFT to burn
     React.useEffect(() => {
-        setShowTx(false)
-        if (showError == "notShownYet") {
+        if (showTx == "willBeShown") {
+            setShowTx(true)
+        } else {
+            setShowTx(false)
+        }
+        if (showError == "willBeShown") {
             setShowError(true)
         } else {
             setShowError(false)
@@ -40,11 +44,11 @@ export default function Altar({
                 // display tx info once it has been mined
                 provider.once(transactionResponse.hash, () => {
                     setTx(transactionResponse.hash.toString())
-                    setShowTx(true)
-                    refreshUIAfterBurn()
+                    setShowTx("willBeShown")
+                    refreshListAfterBurn()
                 })
             } catch (error) {
-                setShowError("notShownYet")
+                setShowError("willBeShown")
                 console.log(error)
             } finally {
                 // cleanup
@@ -56,10 +60,10 @@ export default function Altar({
     }
 
     return (
-        <div className="grid m-8">
+        <div className="grid mt-8 mb-12">
             <div className="flex items-center justify-center p-8 aspect-square rounded-lg border-neutral-700 bg-neutral-800 bg-opacity-30">
                 {nftToSacrify !== null ? (
-                    <div className="group justify-self-start rounded-lg border px-5 py-4 transition-colors">
+                    <div className="group justify-self-start rounded-lg px-5 py-4 transition-colors">
                         <h4 className={`mb-3 text-l font-semibold`}>{nftToSacrify.title}</h4>
                         <Image
                             src={nftToSacrify.media[0].gateway}
@@ -69,48 +73,56 @@ export default function Altar({
                         />
                     </div>
                 ) : (
-                    <p>NFT to be sacrificed</p>
+                    <p className="font-mono">NFT to be sacrificed</p>
                 )}
             </div>
             {/* confirm or cancel buttons */}
             {sacrificeAsked && (
                 <div className="grid">
                     <button
-                        className="p-4 bg-red-800 rounded"
+                        className="mt-4 flex items-center justify-center gap-x-6 rounded-md bg-red-900 px-3.5 py-2.5 text-sm font-mono text-white shadow-sm hover:bg-red-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-900"
                         disabled={isLoading}
                         onClick={() => burnNft(parseInt(nftToSacrify.tokenId))}
                     >
                         {isLoading ? "Burning..." : "Burn"}
                     </button>
-                    <button
-                        className="p-4 bg-gray-400 rounded"
-                        disabled={isLoading}
-                        onClick={() => toggleSacrify()}
-                    >
-                        Cancel
-                    </button>
+                    {!isLoading && (
+                        <button
+                            className="mt-4 flex items-center justify-center gap-x-6 rounded-md bg-gray-500 px-3.5 py-2.5 text-sm font-mono text-white shadow-sm hover:bg-gray-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-500"
+                            disabled={isLoading}
+                            onClick={() => toggleSacrify()}
+                        >
+                            Cancel
+                        </button>
+                    )}
                 </div>
             )}
             {/* main burn button */}
             {nftToSacrify && !sacrificeAsked && (
-                <button onClick={() => toggleSacrify()} className="p-4 bg-red-500 rounded">
+                <button
+                    onClick={() => toggleSacrify()}
+                    className="mt-4 flex items-center justify-center gap-x-6 rounded-md bg-red-600 px-3.5 py-2.5 text-sm font-mono text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+                >
                     Sacrify
                 </button>
             )}
             {/* display transaction info */}
             {showTx && (
-                <div className="bg-green-200">
-                    Successfully burned your NFT!
-                    <div>
+                <div className="m-auto">
+                    <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                         <a className="underline" href={`https://etherscan.io/tx/${tx}`}>
-                            Etherscan link
+                            Successfully burned your NFT!
                         </a>
-                    </div>
+                    </span>
                 </div>
             )}
             {/* display error message */}
             {showError && (
-                <div className="bg-red-200">Can't burn NFT from another collection!</div>
+                <div className="m-auto">
+                    <span className="inline-flex items-center rounded-md bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/10">
+                        Can't burn NFT from another collection!
+                    </span>
+                </div>
             )}
         </div>
     )

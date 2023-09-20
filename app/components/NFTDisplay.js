@@ -52,7 +52,7 @@ export default function NFTDisplay({ handleSelect, refreshAfterMint, refreshAfte
                     onClick={() => {
                         handleSelect(nft)
                     }}
-                    className="group justify-self-start rounded-lg border px-5 py-4 cursor-pointer transition-colors hover:border-red-500 hover:bg-red-300 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
+                    className="group justify-self-start rounded-lg px-5 py-4 cursor-pointer transition-colors hover:border-red-500 hover:bg-red-300 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
                 >
                     <h4 className={`mb-3 text-l font-semibold`}>{nft.title}</h4>
                     <Image src={nft.media[0].gateway} width={200} height={200} alt={nft.title} />

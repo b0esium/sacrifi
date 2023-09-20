@@ -56,17 +56,17 @@ export default function Home() {
         }
     }
 
-    function refreshUIAfterBurn() {
+    function refreshListAfterBurn() {
         // trigger getNfts() from useEffect in NFTDisplay
         setRefreshAfterBurn(!refreshAfterBurn)
     }
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-around p-24">
+        <main className="flex min-h-screen flex-col items-center justify-around p-8">
             {/* menu bar with rainbow kit connect button */}
             <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-                <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-                    Sacrifice an NFT to mint a unique Rug!
+                <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-3 pt-3 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
+                    Sacrifice an NFT to mint a unique Pug!
                 </p>
                 <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
                     <ConnectButton />
@@ -74,27 +74,26 @@ export default function Home() {
             </div>
             {isConnected ? (
                 <div className="contents">
-                    <div>
+                    <div className="grid m-4">
                         {/* mint button */}
                         <button
                             id="mintBtn"
-                            className="p-4 rounded bg-violet-600"
+                            className="mt-10 flex items-center justify-center gap-x-6 rounded-md bg-purple-600 px-3.5 py-2.5 text-sm font-mono text-white shadow-sm hover:bg-purple-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-purple-600"
                             disabled={!writeMint || isLoading || isLoadingMint}
                             onClick={() => mintNft()}
                         >
-                            {isLoading || isLoadingMint ? "Minting..." : "Mint"}
+                            {isLoading || isLoadingMint ? "Minting..." : "Mint a test NFT"}
                         </button>
                         {isSuccessMint && (
-                            <div className="bg-green-200">
-                                Successfully minted your NFT!
-                                <div>
+                            <div className="m-auto">
+                                <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                                     <a
                                         className="underline"
                                         href={`https://etherscan.io/tx/${dataMint?.hash}`}
                                     >
-                                        Etherscan link
+                                        Successfully minted your NFT!
                                     </a>
-                                </div>
+                                </span>
                             </div>
                         )}
                     </div>
@@ -104,7 +103,7 @@ export default function Home() {
                         setNftToSacrify={setNftToSacrify}
                         sacrificeAsked={sacrificeAsked}
                         toggleSacrify={toggleSacrify}
-                        refreshUIAfterBurn={refreshUIAfterBurn}
+                        refreshListAfterBurn={refreshListAfterBurn}
                     />
                     {/* display NFTs available to sacrify */}
                     <NFTDisplay
