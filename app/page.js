@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect } from "react"
+import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import {
     useAccount,
@@ -13,16 +13,17 @@ import Altar from "./components/Altar"
 import NFTDisplay from "./components/NFTDisplay"
 
 export default function Home() {
-    // state management
+    const { isConnected } = useAccount()
+
+    // initialize state
     const [sacrificeAsked, setSacrificeAsked] = React.useState(false)
     const [nftToSacrify, setNftToSacrify] = React.useState(null)
     const [refreshAfterBurn, setRefreshAfterBurn] = React.useState(false)
 
-    const { isConnected } = useAccount()
-
     // load smart contract function hook
+    const CONTRACT_ADDRESS = "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea"
     const { config: configMint } = usePrepareContractWrite({
-        address: "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
+        address: CONTRACT_ADDRESS,
         abi: abi,
         functionName: "safeMint",
         // sepolia
@@ -41,12 +42,14 @@ export default function Home() {
         }
     }
 
+    // toggle Burn buttons
     function toggleSacrify() {
         setSacrificeAsked(!sacrificeAsked)
     }
 
     function mintNft() {
         try {
+            // call the mint from the smart contract
             writeMint?.()
         } catch (error) {
             console.log(error)
@@ -54,12 +57,13 @@ export default function Home() {
     }
 
     function refreshUIAfterBurn() {
-        // trigger getNfts() in NFTDisplay
+        // trigger getNfts() from useEffect in NFTDisplay
         setRefreshAfterBurn(!refreshAfterBurn)
     }
 
     return (
-        <main className="flex min-h-screen flex-col items-center justify-between p-24">
+        <main className="flex min-h-screen flex-col items-center justify-around p-24">
+            {/* menu bar with rainbow kit connect button */}
             <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
                 <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
                     Sacrifice an NFT to mint a unique Rug!
@@ -68,46 +72,50 @@ export default function Home() {
                     <ConnectButton />
                 </div>
             </div>
-            <div>
-                <button
-                    id="mintBtn"
-                    className="p-4 rounded bg-violet-600"
-                    disabled={!writeMint || isLoading || isLoadingMint}
-                    onClick={() => mintNft()}
-                >
-                    {isLoading || isLoadingMint ? "Minting..." : "Mint"}
-                </button>
-                {isSuccessMint && (
-                    <div>
-                        Successfully minted your NFT!
-                        <div>
-                            <a
-                                className="underline"
-                                href={`https://etherscan.io/tx/${dataMint?.hash}`}
-                            >
-                                Etherscan link
-                            </a>
-                        </div>
-                    </div>
-                )}
-            </div>
             {isConnected ? (
-                <Altar
-                    nftToSacrify={nftToSacrify}
-                    setNftToSacrify={setNftToSacrify}
-                    sacrificeAsked={sacrificeAsked}
-                    toggleSacrify={toggleSacrify}
-                    refreshUIAfterBurn={refreshUIAfterBurn}
-                />
+                <div className="contents">
+                    <div>
+                        {/* mint button */}
+                        <button
+                            id="mintBtn"
+                            className="p-4 rounded bg-violet-600"
+                            disabled={!writeMint || isLoading || isLoadingMint}
+                            onClick={() => mintNft()}
+                        >
+                            {isLoading || isLoadingMint ? "Minting..." : "Mint"}
+                        </button>
+                        {isSuccessMint && (
+                            <div className="bg-green-200">
+                                Successfully minted your NFT!
+                                <div>
+                                    <a
+                                        className="underline"
+                                        href={`https://etherscan.io/tx/${dataMint?.hash}`}
+                                    >
+                                        Etherscan link
+                                    </a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                    {/* display altar (chosen NFT to sacrify) */}
+                    <Altar
+                        nftToSacrify={nftToSacrify}
+                        setNftToSacrify={setNftToSacrify}
+                        sacrificeAsked={sacrificeAsked}
+                        toggleSacrify={toggleSacrify}
+                        refreshUIAfterBurn={refreshUIAfterBurn}
+                    />
+                    {/* display NFTs available to sacrify */}
+                    <NFTDisplay
+                        handleSelect={handleSelect}
+                        refreshAfterMint={isSuccessMint}
+                        refreshAfterBurn={refreshAfterBurn}
+                    />
+                </div>
             ) : (
+                // if not connected, display app title
                 <h1 className="text-6xl font-bold">Sacri.fi</h1>
-            )}
-            {isConnected && (
-                <NFTDisplay
-                    handleSelect={handleSelect}
-                    refreshAfterMint={isSuccessMint}
-                    refreshAfterBurn={refreshAfterBurn}
-                />
             )}
         </main>
     )

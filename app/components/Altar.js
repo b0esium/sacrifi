@@ -10,39 +10,47 @@ export default function Altar({
     toggleSacrify,
     refreshUIAfterBurn,
 }) {
+    // initialize state
     const [isLoading, setIsLoading] = React.useState(false)
     const [tx, setTx] = React.useState("")
     const [showTx, setShowTx] = React.useState(false)
+    const [showError, setShowError] = React.useState(false)
 
+    // remove previous tx info or error message when selecting a new NFT to burn
     React.useEffect(() => {
         setShowTx(false)
+        if (showError == "notShownYet") {
+            setShowError(true)
+        } else {
+            setShowError(false)
+        }
     }, [nftToSacrify])
 
     async function burnNft(tokenId) {
-        if (typeof window.ethereum !== undefined) {
+        if (window.ethereum !== undefined) {
             const provider = new ethers.BrowserProvider(window.ethereum)
             const signer = await provider.getSigner()
-            const contract = new ethers.Contract(
-                "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea",
-                abi,
-                signer
-            )
+            const CONTRACT_ADDRESS = "0xBaDdBDc73Ec4F44F5D2Fd455e5BdD2DF357A56ea"
+            const contract = new ethers.Contract(CONTRACT_ADDRESS, abi, signer)
             setIsLoading(true)
             try {
+                // call the burn from the smart contract
                 const transactionResponse = await contract.burn(tokenId)
                 await transactionResponse.wait()
+                // display tx info once it has been mined
                 provider.once(transactionResponse.hash, () => {
                     setTx(transactionResponse.hash.toString())
                     setShowTx(true)
+                    refreshUIAfterBurn()
                 })
             } catch (error) {
+                setShowError("notShownYet")
                 console.log(error)
             } finally {
                 // cleanup
                 setIsLoading(false)
                 toggleSacrify()
                 setNftToSacrify(null)
-                refreshUIAfterBurn()
             }
         }
     }
@@ -64,6 +72,7 @@ export default function Altar({
                     <p>NFT to be sacrificed</p>
                 )}
             </div>
+            {/* confirm or cancel buttons */}
             {sacrificeAsked && (
                 <div className="grid">
                     <button
@@ -82,13 +91,15 @@ export default function Altar({
                     </button>
                 </div>
             )}
+            {/* main burn button */}
             {nftToSacrify && !sacrificeAsked && (
                 <button onClick={() => toggleSacrify()} className="p-4 bg-red-500 rounded">
                     Sacrify
                 </button>
             )}
+            {/* display transaction info */}
             {showTx && (
-                <div>
+                <div className="bg-green-200">
                     Successfully burned your NFT!
                     <div>
                         <a className="underline" href={`https://etherscan.io/tx/${tx}`}>
@@ -96,6 +107,10 @@ export default function Altar({
                         </a>
                     </div>
                 </div>
+            )}
+            {/* display error message */}
+            {showError && (
+                <div className="bg-red-200">Can't burn NFT from another collection!</div>
             )}
         </div>
     )

@@ -1,13 +1,11 @@
--   refresh UI after burn
--   pb: UI doesn't always refresh
--   add debounce
 -   manage errors
--   mint special NFT only if already burned at least one
--   burn NFT from any collection (with setApproval)
--   improve UI (with Tailwind)
--   avoid multiple Alchemy API calls
+-   add debounce
 -   enhance code (with AI)
 -   document (with AI)
+-   improve UI (with Tailwind)
+-   burn NFT from any collection (with setApproval)
+-   mint special NFT only if already burned at least one
+-   avoid multiple Alchemy API calls
 -   mint a generative art NFT
 -   rewrite in Typescript
 -   calculate minted NFT rarity from burned NFT price x randomness

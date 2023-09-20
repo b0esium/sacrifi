@@ -5,12 +5,15 @@ import { useState, useEffect } from "react"
 
 export default function NFTDisplay({ handleSelect, refreshAfterMint, refreshAfterBurn }) {
     const { address } = useAccount()
+
+    // initialize Alchemy API
     const settings = {
         apiKey: process.env.ALCHEMY_API_KEY_SEPOLIA,
         network: Network.ETH_SEPOLIA,
     }
     const alchemy = new Alchemy(settings)
 
+    // initialize state
     const [nfts, setNfts] = useState([])
 
     // load NFT data when this component is mounted and after each mint or burn
@@ -19,27 +22,26 @@ export default function NFTDisplay({ handleSelect, refreshAfterMint, refreshAfte
     }, [refreshAfterMint, refreshAfterBurn])
 
     async function getNfts() {
+        // get NFTs for the current user
         // exclude spam NFTs known by the Alchemy API
         const excludeFilters = "SPAM"
-        const nftsForOwner = await alchemy.nft.getNftsForOwner(address, excludeFilters)
+        try {
+            const nftsForOwner = await alchemy.nft.getNftsForOwner(address, excludeFilters)
 
-        console.log("number of NFTs found:", nftsForOwner.totalCount)
+            // exclude NFTs with no title or no images cached by Alchemy API (usually spam)
+            let filteredNfts = nftsForOwner.ownedNfts.filter((nft) => {
+                return (
+                    nft.title !== "" ||
+                    nft.media[0].gateway.includes("nft-cdn.alchemy.com") ||
+                    nft.media[0].gateway.includes("ipfs.io")
+                )
+            })
 
-        // exclude NFTs with no title (usually spam)
-        let filteredNfts = nftsForOwner.ownedNfts.filter((nft) => {
-            return nft.title !== ""
-        })
-        // exclude NFTs with no images cached by Alchemy API (usually spam)
-        filteredNfts = filteredNfts.filter((nft) => {
-            return (
-                nft.media[0].gateway.includes("nft-cdn.alchemy.com") ||
-                nft.media[0].gateway.includes("ipfs.io")
-            )
-        })
-
-        console.log("number of NFTs found after filtering:", filteredNfts.length)
-
-        setNfts([...filteredNfts])
+            // update state with clean array of NFTs
+            setNfts([...filteredNfts])
+        } catch (error) {
+            console.log(error)
+        }
     }
 
     return (
